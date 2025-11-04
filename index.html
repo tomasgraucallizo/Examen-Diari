@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="format-detection" content="telephone=no">
+    <title>Seguiment Hàbits</title>
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiU2VndWltZW50IEjDoGJpdHMiLCJzaG9ydF9uYW1lIjoiSMOgYml0cyIsInN0YXJ0X3VybCI6Ii8iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjZjVmNWY0IiwidGhlbWVfY29sb3IiOiIjMTBiOTgxIn0=">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+            position: fixed;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #fafaf9 0%, #f5f5f4 100%);
+            color: #292524;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        #app {
+            width: 100%;
+            height: 100vh;
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: white;
+            padding: 8px 20px 16px 20px;
+            border-bottom: 1px solid #e7e5e4;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .header-date {
+            font-size: 13px;
+            color: #78716c;
+            margin-top: 4px;
+        }
+        
+        .moon-icon {
+            font-size: 32px;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            padding: 12px 20px;
+            background: white;
+            flex-shrink: 0;
+        }
+        
+        .nav-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .nav-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .btn-week {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        
+        .btn-history {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        }
+        
+        .btn-back {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .content {
+            padding: 15px 20px 20px 20px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            flex: 1;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 15px;
+            border-left: 4px solid;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .category-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .category-icon {
+            font-size: 24px;
+        }
+        
+        .category-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .progress-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        
+        .habit-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #fafaf9;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .habit-item:active {
+            background: #f5f5f4;
+        }
+        
+        .checkbox {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 2px solid #d6d3d1;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+        
+        .checkbox.checked {
+            background: #10b981;
+            border-color: #10b981;
+            color: white;
+        }
+        
+        .checkbox.unchecked {
+            background: #ef4444;
+            border-color: #ef4444;
+            color: white;
+        }
+        
+        .habit-label {
+            flex: 1;
+            font-size: 14px;
+        }
+        
+        .reflection-card {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .reflection-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+        
+        .reflection-input {
+            width: 100%;
+            background: #fafaf9;
+            border: 2px solid #e7e5e4;
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 14px;
+            font-family: inherit;
+            min-height: 100px;
+            resize: vertical;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+        
+        .reflection-input:focus {
+            outline: none;
+            border-color: #10b981;
+        }
+        
+        .save-button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-bottom: 10px;
+        }
+        
+        .save-button:active {
+            transform: scale(0.98);
+        }
+        
+        .footer-text {
+            text-align: center;
+            color: #a8a29e;
+            font-size: 12px;
+            padding-bottom: 10px;
+        }
+        
+        .week-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .week-card {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            border-left: 4px solid;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: #e7e5e4;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+        
+        .progress-text {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: right;
+        }
+        
+        .days-section {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid #fbbf24;
+        }
+        
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .day-item {
+            text-align: center;
+        }
+        
+        .day-date {
+            font-size: 10px;
+            color: #78716c;
+            margin-bottom: 4px;
+        }
+        
+        .day-box {
+            height: 50px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 12px;
+        }
+        
+        .date-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fafaf9;
+            padding: 12px;
+            margin: 0 20px 15px 20px;
+            border-radius: 12px;
+            flex-shrink: 0;
+        }
+        
+        .nav-arrow {
+            padding: 8px 12px;
+            font-size: 20px;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+        
+        .date-text {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .history-card {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .stats-text {
+            font-size: 14px;
+            color: #78716c;
+            font-weight: 600;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .empty-icon {
+            font-size: 48px;
+            opacity: 0.5;
+            margin-bottom: 12px;
+        }
+        
+        .empty-text {
+            color: #78716c;
+            font-size: 16px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+
+        /* Asegurar que el contenido scrolleable llegue hasta abajo */
+        .scrollable-content {
+            overflow-y: auto;
+            overflow-x: hidden;
+            flex: 1;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* Optimización específica para Samsung Galaxy S10 */
+        @media screen and (max-width: 412px) and (max-height: 869px) {
+            .header {
+                padding-top: 4px;
+            }
+            .header-title {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script>
+        const CATEGORIES = {
+            deu: {
+                title: 'DEU',
+                icon: '🙏',
+                color: '#8b5cf6',
+                habits: [
+                    { id: 'missa', label: 'Missa cada dia' },
+                    { id: 'oracio', label: "Fer l'oració cada dia" }
+                ]
+            },
+            salud: {
+                title: 'SALUD',
+                icon: '💪',
+                color: '#10b981',
+                habits: [
+                    { id: 'dominades', label: 'Fer dominades i dips cada dia' },
+                    { id: 'cames', label: 'Cada 2 dies fer coses de cames al gimnàs' },
+                    { id: 'no_sucre', label: 'No menjar sucre processat' },
+                    { id: 'no_pa', label: 'No menjar pa' },
+                    { id: 'no_salses', label: 'No menjar salses' },
+                    { id: 'fruita', label: 'Si tinc gana, menjar fruita' },
+                    { id: 'nomes_dinar', label: 'Només dinar' },
+                    { id: 'dormir_8h', label: 'Dormir 8 hores' },
+                    { id: 'dormir_despres', label: 'Quan acabem trucada, anar a dormir o llegir' }
+                ]
+            },
+            estudis: {
+                title: 'ESTUDIS',
+                icon: '📚',
+                color: '#3b82f6',
+                habits: [
+                    { id: 'estudiar', label: 'Estudiar cada dia el que toca' }
+                ]
+            },
+            cultura: {
+                title: 'CULTURITZAR-NOS',
+                icon: '📖',
+                color: '#f59e0b',
+                habits: [
+                    { id: 'llegir', label: "Llegir cada dia mínim 15 minuts d'algun llibre" }
+                ]
+            },
+            relacions: {
+                title: 'RELACIONS',
+                icon: '❤️',
+                color: '#ec4899',
+                habits: [
+                    { id: 'rosa', label: "Rosa: Estar pendent d'ella durant el dia" },
+                    { id: 'amics', label: 'Amics i família: Trucar-los o reflexionar' }
+                ]
+            },
+            ment: {
+                title: 'MENT',
+                icon: '🧠',
+                color: '#6366f1',
+                habits: [
+                    { id: 'reflexionar', label: 'Passar 15 minuts reflexionant en silenci' },
+                    { id: 'avorrit', label: 'Si estic avorrit: podcast o llegir' }
+                ]
+            }
+        };
+
+        class HabitsApp {
+            constructor() {
+                this.view = 'today';
+                this.currentDate = new Date().toISOString().split('T')[0];
+                this.todayData = {};
+                this.reflection = '';
+                this.savedDays = {};
+                this.historyDate = this.currentDate;
+                
+                this.loadData();
+                this.render();
+            }
+
+            loadData() {
+                const saved = localStorage.getItem('habitTrackerData');
+                if (saved) {
+                    this.savedDays = JSON.parse(saved);
+                }
+                
+                if (this.savedDays[this.currentDate]) {
+                    this.todayData = this.savedDays[this.currentDate].habits || {};
+                    this.reflection = this.savedDays[this.currentDate].reflection || '';
+                }
+            }
+
+            saveData() {
+                this.savedDays[this.currentDate] = {
+                    habits: this.todayData,
+                    reflection: this.reflection,
+                    date: this.currentDate
+                };
+                localStorage.setItem('habitTrackerData', JSON.stringify(this.savedDays));
+            }
+
+            toggleHabit(habitId) {
+                if (this.todayData[habitId] === undefined) {
+                    this.todayData[habitId] = true;
+                } else if (this.todayData[habitId] === true) {
+                    this.todayData[habitId] = false;
+                } else {
+                    this.todayData[habitId] = undefined;
+                }
+                this.render();
+            }
+
+            saveDay() {
+                this.saveData();
+                alert('✅ Dia guardat correctament!');
+            }
+
+            calculateProgress(categoryKey) {
+                const category = CATEGORIES[categoryKey];
+                const total = category.habits.length;
+                const completed = category.habits.filter(h => this.todayData[h.id] === true).length;
+                return total > 0 ? Math.round((completed / total) * 100) : 0;
+            }
+
+            getLast7Days() {
+                const dates = [];
+                for (let i = 6; i >= 0; i--) {
+                    const d = new Date();
+                    d.setDate(d.getDate() - i);
+                    dates.push(d.toISOString().split('T')[0]);
+                }
+                return dates;
+            }
+
+            changeHistoryDate(direction) {
+                const d = new Date(this.historyDate);
+                d.setDate(d.getDate() + direction);
+                this.historyDate = d.toISOString().split('T')[0];
+                this.render();
+            }
+
+            setView(newView) {
+                this.view = newView;
+                if (newView === 'history') {
+                    this.historyDate = this.currentDate;
+                }
+                this.render();
+            }
+
+            renderTodayView() {
+                const dateStr = new Date(this.currentDate).toLocaleDateString('ca-ES', { 
+                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+                });
+
+                return `
+                    <div class="header">
+                        <div class="header-content">
+                            <div>
+                                <div class="header-title">Seguiment Diari</div>
+                                <div class="header-date">${dateStr}</div>
+                            </div>
+                            <div class="moon-icon">🌙</div>
+                        </div>
+                    </div>
+
+                    <div class="nav-buttons">
+                        <button class="nav-btn btn-week" onclick="app.setView('week')">📊 Setmana</button>
+                        <button class="nav-btn btn-history" onclick="app.setView('history')">📜 Historial</button>
+                    </div>
+
+                    <div class="content">
+                        ${Object.entries(CATEGORIES).map(([key, category]) => `
+                            <div class="card" style="border-left-color: ${category.color}">
+                                <div class="card-header">
+                                    <div class="category-info">
+                                        <span class="category-icon">${category.icon}</span>
+                                        <span class="category-title">${category.title}</span>
+                                    </div>
+                                    <span class="progress-badge" style="background: ${category.color}">
+                                        ${this.calculateProgress(key)}%
+                                    </span>
+                                </div>
+                                ${category.habits.map(habit => `
+                                    <div class="habit-item" onclick="app.toggleHabit('${habit.id}')">
+                                        <div class="checkbox ${this.todayData[habit.id] === true ? 'checked' : this.todayData[habit.id] === false ? 'unchecked' : ''}">
+                                            ${this.todayData[habit.id] === true ? '✓' : this.todayData[habit.id] === false ? '✗' : ''}
+                                        </div>
+                                        <span class="habit-label">${habit.label}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `).join('')}
+
+                        <div class="reflection-card">
+                            <div class="reflection-title">📝 Reflexió del Dia</div>
+                            <textarea class="reflection-input" 
+                                      placeholder="Com ha anat el dia? Què has après? Què vols millorar demà?"
+                                      oninput="app.reflection = this.value">${this.reflection}</textarea>
+                        </div>
+
+                        <button class="save-button" onclick="app.saveDay()">💾 Guardar Dia</button>
+                        <div class="footer-text">Les dades es guarden al teu dispositiu</div>
+                    </div>
+                `;
+            }
+
+            renderWeekView() {
+                return `
+                    <div class="header">
+                        <div class="header-content">
+                            <div class="header-title">📊 Resum Setmanal</div>
+                            <button class="btn-back" onclick="app.setView('today')">Tornar</button>
+                        </div>
+                    </div>
+
+                    <div class="content">
+                        <div class="week-grid">
+                            ${Object.entries(CATEGORIES).map(([key, category]) => {
+                                const progress = this.calculateProgress(key);
+                                return `
+                                    <div class="week-card" style="border-left-color: ${category.color}">
+                                        <div class="category-info">
+                                            <span class="category-icon">${category.icon}</span>
+                                            <span class="category-title">${category.title}</span>
+                                        </div>
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" style="width: ${progress}%; background: ${category.color}"></div>
+                                        </div>
+                                        <div class="progress-text" style="color: ${category.color}">${progress}%</div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+
+                        <div class="days-section">
+                            <div class="reflection-title">📅 Últims 7 dies</div>
+                            <div class="days-grid">
+                                ${this.getLast7Days().map(date => {
+                                    const dayData = this.savedDays[date];
+                                    const totalHabits = Object.values(CATEGORIES).reduce((sum, cat) => sum + cat.habits.length, 0);
+                                    const completed = dayData ? Object.values(dayData.habits).filter(v => v === true).length : 0;
+                                    const percentage = totalHabits > 0 ? Math.round((completed / totalHabits) * 100) : 0;
+                                    const color = percentage >= 80 ? '#10b981' : percentage >= 50 ? '#f59e0b' : percentage > 0 ? '#ef4444' : '#d1d5db';
+                                    
+                                    return `
+                                        <div class="day-item">
+                                            <div class="day-date">${date.slice(8)}</div>
+                                            <div class="day-box" style="background: ${color}">
+                                                ${dayData ? percentage + '%' : '-'}
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderHistoryView() {
+                const historyDayData = this.savedDays[this.historyDate];
+                
+                return `
+                    <div class="header">
+                        <div class="header-content">
+                            <div class="header-title">📜 Historial</div>
+                            <button class="btn-back" onclick="app.setView('today')">Tornar</button>
+                        </div>
+                    </div>
+
+                    <div class="date-nav">
+                        <button class="nav-arrow" onclick="app.changeHistoryDate(-1)">◀</button>
+                        <div class="date-text">${this.historyDate}</div>
+                        <button class="nav-arrow" onclick="app.changeHistoryDate(1)" 
+                                ${this.historyDate === this.currentDate ? 'disabled style="opacity:0.3"' : ''}>▶</button>
+                    </div>
+
+                    <div class="content">
+                        ${historyDayData ? `
+                            ${Object.entries(CATEGORIES).map(([catKey, category]) => {
+                                const completed = category.habits.filter(h => historyDayData.habits[h.id] === true).length;
+                                const total = category.habits.length;
+                                
+                                return `
+                                    <div class="history-card">
+                                        <div class="card-header">
+                                            <div class="category-info">
+                                                <span class="category-icon">${category.icon}</span>
+                                                <span class="category-title">${category.title}</span>
+                                            </div>
+                                            <span class="stats-text">${completed}/${total}</span>
+                                        </div>
+                                        ${category.habits.map(habit => `
+                                            <div class="habit-item">
+                                                <span style="font-size: 20px">
+                                                    ${historyDayData.habits[habit.id] === true ? '✅' : 
+                                                      historyDayData.habits[habit.id] === false ? '❌' : '⚪'}
+                                                </span>
+                                                <span class="habit-label">${habit.label}</span>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                `;
+                            }).join('')}
+
+                            <div class="reflection-card">
+                                <div class="reflection-title">📝 Reflexió del dia</div>
+                                <p style="white-space: pre-wrap; line-height: 1.5">${historyDayData.reflection || 'Cap reflexió guardada'}</p>
+                            </div>
+                        ` : `
+                            <div class="empty-state">
+                                <div class="empty-icon">📅</div>
+                                <div class="empty-text">No hi ha dades per aquest dia</div>
+                            </div>
+                        `}
+                    </div>
+                `;
+            }
+
+            render() {
+                const appElement = document.getElementById('app');
+                
+                if (this.view === 'week') {
+                    appElement.innerHTML = this.renderWeekView();
+                } else if (this.view === 'history') {
+                    appElement.innerHTML = this.renderHistoryView();
+                } else {
+                    appElement.innerHTML = this.renderTodayView();
+                }
+            }
+        }
+
+        let app;
+        window.addEventListener('DOMContentLoaded', () => {
+            app = new HabitsApp();
+        });
+    </script>
+</body>
+</html>
